@@ -1,0 +1,23 @@
+@api {% if endpoint.tag %}@{{ endpoint.tag }}{% endif %}
+Feature: {% if endpoint.summary %}{{ endpoint.summary }}{% else %}API to {{ endpoint.name }}{% endif %}
+    {%- if endpoint.description %}
+    {{ endpoint.description }}
+    {%- endif %}
+    {% for status_code, response in endpoint.responses.items() %}
+
+    Scenario: {{ endpoint.name }} return {% if response["description"] %}{{ response["description"] }}{% else %}{{ status_code }}{% endif %}
+        {%- if endpoint.original_path != endpoint.path %}
+        # {{ endpoint.method }} - {{ endpoint.original_path }}
+        {%- endif %}
+        Given a request url {{ endpoint.path }}
+        {% if endpoint.query_parameters %}And a request parameters
+            |{% for prop in endpoint.query_parameters %} {{ prop["name"] }} |{% endfor %}
+            |{% for prop in endpoint.query_parameters %} {{ prop["default"] }} |{% endfor %}
+        {% endif %}{% if endpoint.json_body %}
+            And a request json payload
+                """
+                {{ endpoint.json_body }}
+                """
+        {% endif %}When the request sends {{ endpoint.method }}
+        Then the response status is {{ status_code }}
+    {% endfor %}
