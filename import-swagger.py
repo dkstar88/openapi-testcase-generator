@@ -52,7 +52,7 @@ class Endpoint:
 
 def fetch_swagger(url):
     r = requests.get(url)
-    return r.json()
+    return json.loads(r.content)
 
 
 def ensure_dir(filename):
